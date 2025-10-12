@@ -1,5 +1,5 @@
 from flask import Blueprint
-from services.questions import get_question_by_position, count_questions
+from services.questions_service import get_question_by_position, count_questions
 
 questions_bp = Blueprint("questions", __name__, url_prefix="/api/questions")
 
