@@ -16,16 +16,16 @@ secret = "Groupe 22"
 expiration_in_seconds = 3600
 
 
-def build_token():
+def build_token(subject: str = "quiz-app-admin"):
     """
     Generates the Auth Token
-    :return: string
+    :param subject: e.g. 'quiz-app-admin' or 'user:<id>'
     """
     try:
         payload = {
             'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=expiration_in_seconds),
             'iat': datetime.datetime.utcnow(),
-            'sub': 'quiz-app-admin'
+            'sub': subject,
         }
         return jwt.encode(
             payload,
