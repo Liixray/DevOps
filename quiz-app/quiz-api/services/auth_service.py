@@ -1,6 +1,7 @@
 import hashlib
-from flask import jsonify
-from jwt_utils import build_token
+from flask import jsonify, request
+from jwt_utils import build_token, decode_token
+from functools import wraps
 
 # md5("admin") = 21232f297a57a5a743894a0e4a801fc3
 ADMIN_HASH_MD5 = "21232f297a57a5a743894a0e4a801fc3"
@@ -25,3 +26,16 @@ def handle_admin_login(payload):
         return jsonify({"token": token}), 200
     except Exception:
         return jsonify({"error": "Internal server error"}), 500
+    
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not request.headers.get("Authorization"):
+            return jsonify({"error": "Unauthorized"}), 401
+        sub = decode_token(request.headers.get("Authorization").split("Bearer ")[-1])
+        if sub == "quiz-app-admin":
+            return f(*args, **kwargs)
+        return jsonify({"error": "Unauthorized"}), 401
+    return decorated_function
