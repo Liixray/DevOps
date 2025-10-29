@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app
 from services.auth_service import handle_admin_login
 
-auth_bp = Blueprint('auth', __name__, url_prefix="/api/auth/admin")
+auth_bp = Blueprint('auth', __name__, url_prefix="/login")
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/', methods=['POST'])
 def admin_login():
 
     payload = request.get_json()
