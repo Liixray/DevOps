@@ -1,15 +1,18 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { loginAdmin } from '@/services/auth'
+import { validateAdminToken } from '@/services/auth'
 
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
 const success = ref(false)
 const showPlaceholder = ref(true)
+const router = useRouter()
 
 async function submit() {
   error.value = ''
@@ -20,12 +23,31 @@ async function submit() {
     localStorage.setItem('admin_token', token)
     success.value = true
     password.value = ''
+    router.push('/admin/dashboard') 
   } catch (e) {
     error.value = "Mot de passe incorrect"
   } finally {
     loading.value = false
   }
 }
+
+async function checkAdminToken() {
+  const token = localStorage.getItem('admin_token');
+  if (token) {
+    try {
+      const isValid = await validateAdminToken(token);
+      if (isValid) {
+        router.push('/admin/dashboard');
+      }
+    } catch (e) {
+      console.error('Token validation failed', e);
+    }
+  }
+}
+
+onMounted(() => {
+  checkAdminToken();
+});
 </script>
 
 <template>

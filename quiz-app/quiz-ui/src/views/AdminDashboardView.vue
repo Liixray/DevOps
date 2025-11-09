@@ -1,8 +1,26 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { validateAdminToken } from '@/services/auth'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getQuestion, getQuestionsCount, updateQuestion, createQuestion, deleteQuestion } from '@/services/questions'
+import QuestionModal from './QuestionModal.vue'
+
+const router = useRouter()
+
+onMounted(async () => {
+  const token = localStorage.getItem('admin_token')
+  if (token) {
+    const isValid = await validateAdminToken()
+    if (!isValid) {
+      router.push('/admin/login')
+    }
+  } else {
+    router.push('/admin/login')
+  }
+})
+
 async function handleDeleteQuestion(q) {
   if (!window.confirm('Voulez-vous vraiment supprimer cette question ?')) return
   loading.value = true
@@ -16,7 +34,6 @@ async function handleDeleteQuestion(q) {
     loading.value = false
   }
 }
-import QuestionModal from './QuestionModal.vue'
 
 const questions = ref([])
 const quizSize = ref(0)
@@ -96,11 +113,19 @@ async function handleUpdatePosition(qIdx, newPos) {
   }
   questions.value.sort((a, b) => a.position - b.position)
 }
+
+function logout() {
+  localStorage.removeItem('admin_token');
+  router.push('/admin/login');
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 p-8">
-    <h1 class="text-3xl font-bold mb-8">Gestion des questions du quiz</h1>
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold">Gestion des questions du quiz</h1>
+      <Button class="bg-red-500 text-white hover:bg-red-600" @click="logout">Se déconnecter</Button>
+    </div>
     <div v-if="loading" class="text-center my-8">Chargement…</div>
     <div v-else-if="error" class="text-red-500 my-8">{{ error }}</div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">

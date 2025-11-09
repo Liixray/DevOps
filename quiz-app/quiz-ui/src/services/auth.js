@@ -42,3 +42,15 @@ export async function loginUser(mail, password) {
   }
   return (await res.json()).token
 }
+
+export async function validateAdminToken() {
+  const url = `${API_BASE}/validate-token/`
+  const adminToken = localStorage.getItem('admin_token')
+  if (!adminToken) return false
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${adminToken}` },
+  })
+  return res.ok
+}
