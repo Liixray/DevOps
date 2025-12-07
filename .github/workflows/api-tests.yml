@@ -20,7 +20,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install Python dependencies
-        working-directory: quiz-api
+        working-directory: quiz-app/quiz-api
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
@@ -30,7 +30,7 @@ jobs:
           node-version: '22'
 
       - name: Install Node dependencies (Newman en local)
-        working-directory: quiz-ui
+        working-directory: quiz-app/quiz-ui
         run: |
           if [ -f package-lock.json ]; then
             npm ci
@@ -39,13 +39,13 @@ jobs:
           fi
 
       - name: Start Flask API
-        working-directory: quiz-api
+        working-directory: quiz-app/quiz-api
         run: |
           python app.py &
           sleep 10
 
       - name: Run Postman tests with Newman
-        working-directory: quiz-ui
+        working-directory: quiz-app/quiz-ui
         env:
           BASE_URL: "http://127.0.0.1:5000"
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
