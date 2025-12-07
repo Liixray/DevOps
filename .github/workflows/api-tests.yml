@@ -1,0 +1,55 @@
+name: Postman API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        working-directory: quiz-api
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies (Newman en local)
+        working-directory: quiz-ui
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Start Flask API
+        working-directory: quiz-api
+        run: |
+          python app.py &
+          sleep 10
+
+      - name: Run Postman tests with Newman
+        working-directory: quiz-ui
+        env:
+          BASE_URL: "http://127.0.0.1:5000"
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          npx newman run "quiz-ui/tests/test_postman_collection.json" \
+            --env-var "baseUrl=$BASE_URL" \
+            --env-var "pwd=$ADMIN_PASSWORD"
