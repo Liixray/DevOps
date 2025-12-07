@@ -50,6 +50,6 @@ jobs:
           BASE_URL: "http://127.0.0.1:5000"
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
-          npx newman run "quiz-ui/tests/test_postman_collection.json" \
+          npx newman run "quiz-app/quiz-ui/tests/test_postman_collection.json" \
             --env-var "baseUrl=$BASE_URL" \
             --env-var "pwd=$ADMIN_PASSWORD"
