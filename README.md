@@ -6,14 +6,34 @@
 ![Tests & Build UI](https://github.com/DevOpsQuizz/DevOps/actions/workflows/ui-test.yml/badge.svg)
 
 ## Architecture Générale
-
-- `quiz-app/quiz-api`: API Flask (Python) exposant les endpoints pour l’authentification, questions, participations et leaderboard.
-  - Fichiers clés: `app.py` (bootstrap de l’API), `routes/*` (routes Flask), `services/*` (logique métier), `db.py` (accès aux données), `models.py` (modèles), `jwt_utils.py` (auth JWT), `Dockerfile` (image API).
-- `quiz-app/quiz-ui`: Frontend Vue 3 + Vite + Tailwind, communique avec l’API.
-  - Fichiers clés: `src/services/*` (appels API), `src/views/*` (pages), `Dockerfile` et `Dockerfile.prod` (images UI), `nginx.conf` (prod).
-- CI/CD GitHub Actions (`.github/workflows`):
-  - `api-tests.yml`: lance des tests Postman (Newman) contre l’API, avec matrice (versions Python/Node et modes local/docker).
-  - `ui-test.yml`: build/test du frontend (selon configuration du workflow).
+```graphql
+DevOps/
+ ├── .github/
+ │     └── workflows/
+ │           ├── api-tests.yml        # CI : tests Postman exécutés via Newman
+ │           └── ui-test.yml          # CI : build / tests UI
+ │
+ ├── quiz-app/
+ │     ├── quiz-api/                  # Backend Flask (Python)
+ │     │     ├── app.py               # Entrée de l'application Flask
+ │     │     ├── routes/              # Endpoints (auth, questions, =participations, leaderboard)
+ │     │     ├── services/            # Logique métier
+ │     │     ├── models.py            # Modèles SQLAlchemy
+ │     │     ├── db.py                # Gestion SQLite
+ │     │     ├── jwt_utils.py         # Utilitaires JWT
+ │     │     ├── requirements.txt     # Dépendances Python
+ │     │     └── Dockerfile           # Image Docker API (Gunicorn)
+ │     │
+ │     └── quiz-ui/                   # Frontend Vue 3 + Vite + Tailwind
+ │           ├── src/
+ │           │     ├── services/      # Requêtes API
+ │           │     └── views/         # Composants/pages
+ │           ├── package.json         # Dépendances NPM
+ │           ├── nginx.conf           # Config Nginx pour la prod
+ │           └── Dockerfile           # Build UI + serveur Nginx
+ │
+ └── README.md                        # Documentation du projet
+```
 
 Flux global:
 1. L’API Flask écoute sur `http://127.0.0.1:5000` et sert les endpoints d’authentification et quiz.
