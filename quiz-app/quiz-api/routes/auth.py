@@ -3,6 +3,7 @@ from services.auth_service import handle_admin_login
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/login")
 
+#Admin login route
 @auth_bp.route('/', methods=['POST'])
 def admin_login():
 
