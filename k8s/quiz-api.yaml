@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-api
+  labels:
+    app: quiz-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz-api
+  template:
+    metadata:
+      labels:
+        app: quiz-api
+    spec:
+      containers:
+      - name: quiz-api
+        image: nassimm/quiz-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        # Pas besoin de variable d'environnement DATABASE_URL si tu gardes le chemin par défaut
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 5000
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 5000
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-api-service
+spec:
+  selector:
+    app: quiz-api
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP
