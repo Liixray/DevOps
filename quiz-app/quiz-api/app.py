@@ -58,6 +58,22 @@ def rebuild_db():
         return "Ok", 200
     except Exception as e:
         return {"error": f"Failed to reset database: {str(e)}"}, 500
+    
+@app.route('/health', methods=['GET'])
+def health_check():
+    try:
+        connection = engine.connect()
+        db_info = {
+            "engine": str(engine),
+            "dialect": engine.dialect.name,
+            "url": str(engine.url),
+            "connector": engine.dialect.driver
+        }
+        connection.close()
+        return {"status": "healthy", "database": db_info}, 200
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}, 500
+
 
 
 if __name__ == "__main__":

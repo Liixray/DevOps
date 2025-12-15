@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: quizdb
+      MYSQL_USER: quizuser
+      MYSQL_PASSWORD: quizpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  quiz-api:
+    build:
+      context: ./quiz-api
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      DATABASE_NAME: quizdb
+      DATABASE_USER: quizuser
+      DATABASE_PASSWORD: quizpass
+      FLASK_ENV: production
+      FLASK_APP: app.py
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./quiz-api:/app
+
+  quiz-ui:
+    build:
+      context: ./quiz-ui
+      args:
+        VITE_API_URL: "http://localhost:5000"
+    depends_on:
+      - quiz-api
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

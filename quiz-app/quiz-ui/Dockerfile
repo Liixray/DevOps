@@ -2,6 +2,10 @@
 # Notez le fait que cette "portion" est nommée "build"
 FROM node:lts-alpine as build
 
+# Allow overriding the API URL at build time (useful in docker-compose)
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL:-http://localhost:5000}
+
 # Installation du framework Vue
 RUN npm install -g @vue/cli
 
@@ -19,8 +23,7 @@ RUN npm install
 COPY . .
 
 # En local même dans Docker, l'API sera toujours accessible comme lors des devs
-# Important : pour déployer l'image de prod, nous changerons ce chemin en /api
-ENV VITE_API_URL=http://localhost:5000
+# Le build-arg `VITE_API_URL` permet d'indiquer l'URL de l'API au moment du build
 
 # Construction du bundle de l'application
 # Ceci va générer la version de prod de l'UI dans le répertoire /app/dist
