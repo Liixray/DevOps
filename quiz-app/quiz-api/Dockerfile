@@ -15,6 +15,7 @@ RUN pip install -r requirements.txt
 ENV FLASK_DEBUG=0
 ENV FLASK_ENV=production
 ENV FLASK_APP=app.py
+ENV DATABASE_TYPE=SQLite
 
 # Code de l'app
 COPY . .

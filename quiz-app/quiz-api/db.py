@@ -4,14 +4,18 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import os
 
+db_type = os.environ.get("DATABASE_TYPE", "mysql")
+
 db_user = os.environ.get("DATABASE_USER", "")
 db_pass = os.environ.get("DATABASE_PASSWORD", "")
 db_host = os.environ.get("DATABASE_HOST", "localhost")
 db_port = os.environ.get("DATABASE_PORT", "3306")
 db_name = os.environ.get("DATABASE_NAME", "")
 
-if db_user and db_pass and db_name:
+if db_user and db_pass and db_name and db_type == "mysql":
     DATABASE_URL = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+else:
+    DATABASE_URL = "sqlite:///quizz-app.db"
 
 engine = create_engine(DATABASE_URL, echo=False, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
