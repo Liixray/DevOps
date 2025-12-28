@@ -3,7 +3,7 @@ name: CD to EKS
 
 on:
   push:
-    branches: [ test-kubernetes ]
+    branches: [ main ]
     paths: ["k8s/**"] # Déclencher aussi si les manifests K8s changent
   # workflow_run:
   #   workflows: ["API Tests & Docker Image", "UI Docker Image"] # Déclencher après le succès des CI/Builds
