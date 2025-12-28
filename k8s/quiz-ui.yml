@@ -56,7 +56,6 @@ spec:
 ---
 
 # Service pour exposer le frontend
-# k8s/quiz-ui.yml (Extrait du Service)
 apiVersion: v1
 kind: Service
 metadata:
