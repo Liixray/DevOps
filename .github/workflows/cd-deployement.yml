@@ -5,12 +5,12 @@ on:
   push:
     branches: [ main ]
     paths: ["k8s/**"] # Déclencher aussi si les manifests K8s changent
-  # workflow_run:
-  #   workflows: ["API Tests & Docker Image", "UI Docker Image"] # Déclencher après le succès des CI/Builds
-  #   types: 
-  #     - completed # S'assurer que le run est terminé
-  #   # Filtrer uniquement les runs réussis pour le déploiement
-  #   if: success()
+  workflow_run:
+    workflows: ["API Tests & Docker Image", "UI Docker Image"] # Déclencher après le succès des CI/Builds
+    types: 
+      - completed # S'assurer que le run est terminé
+    # Filtrer uniquement les runs réussis pour le déploiement
+    # if: success()
   # Décommenter si vous voulez un déploiement basé sur les tags (GitOps)
   # push:
   #   tags:
