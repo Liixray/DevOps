@@ -1,0 +1,67 @@
+# .github/workflows/cd-deployment.yml
+name: CD to EKS
+
+on:
+  push:
+    branches: [ test-kubernetes ]
+    paths: ["k8s/**"] # Déclencher aussi si les manifests K8s changent
+  # workflow_run:
+  #   workflows: ["API Tests & Docker Image", "UI Docker Image"] # Déclencher après le succès des CI/Builds
+  #   types: 
+  #     - completed # S'assurer que le run est terminé
+  #   # Filtrer uniquement les runs réussis pour le déploiement
+  #   if: success()
+  # Décommenter si vous voulez un déploiement basé sur les tags (GitOps)
+  # push:
+  #   tags:
+  #     - 'v*'
+
+jobs:
+  deploy-to-eks:
+    # S'assurer que ce job ne s'exécute que si les builds précédents ont réussi
+    runs-on: ubuntu-latest
+    
+    # Condition pour s'assurer que le workflow parent qui a déclenché ceci était bien réussi
+    # Cette condition est plus complexe pour les "workflow_run", nous allons simplifier ici.
+    # Pour un test simple, on s'appuiera sur 'workflow_run' success().
+
+    environment: production # Optionnel, pour un environnement protégé dans GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------
+      # Étape 1 : Configuration AWS & Authentification
+      # ----------------------------------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ----------------------------------------------------
+      # Étape 2 : Obtenir le Kubeconfig EKS
+      # ----------------------------------------------------
+      - name: Update Kubeconfig
+        # La CLI AWS récupère les identifiants EKS et les ajoute au fichier kubeconfig de l'environnement de l'Action
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ secrets.AWS_REGION }}
+
+      # ----------------------------------------------------
+      # Étape 3 : Déploiement Kubectl
+      # ----------------------------------------------------
+      - name: Verify kubectl access
+        run: |
+          kubectl get svc # Simple vérification pour s'assurer que la connexion fonctionne
+
+      - name: Deploy API and UI to EKS
+        run: |
+          echo "Applying Kubernetes manifests from k8s directory..."
+          # Note: Assurez-vous que le chemin 'k8s' est correct par rapport à la racine du dépôt.
+          kubectl apply -f k8s/quiz-api.yml
+          kubectl apply -f k8s/quiz-ui.yml
+          echo "Deployment initiated. Check EKS console for status."

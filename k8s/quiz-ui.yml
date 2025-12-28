@@ -1,0 +1,69 @@
+# ConfigMap pour la configuration du frontend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  REACT_APP_API_URL: http://localhost:5000
+---
+
+# Deployment Frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-ui
+  labels:
+    app: quiz-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quiz-ui
+  template:
+    metadata:
+      labels:
+        app: quiz-ui
+    spec:
+      containers:
+      - name: quiz-ui
+        image: nassimm/quiz-ui:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: frontend-config
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+
+# Service pour exposer le frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-ui-service
+spec:
+  selector:
+    app: quiz-ui
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
