@@ -115,13 +115,13 @@ docker rm -f quiz-api-local; docker rm -f quiz-ui-local; docker rm -f quiz-ui-pr
 - En CI, les tests utilisent `BASE_URL=http://127.0.0.1:5000` et un secret `ADMIN_PASSWORD`.
 
 ## Déploiement
-### 5.1 Workflow CD
+#### Workflow CD
 Voir [.github/workflows/cd-deployement.yml](https://github.com/DevOpsQuizz/DevOps/blob/main/.github/workflows/cd-deployement.yml).
 
-#### Déclenchement (Triggers)
+##### Déclenchement (Triggers)
 Nous avons configuré le workflow pour qu'il s'active lors d'un `push` sur la branche `main`, ou spécifiquement si des fichiers dans le répertoire `k8s/` sont modifiés. Cela nous permet d'isoler nos tests Kubernetes du reste du développement.
 
-#### Étapes Clés du Job deploy-to-eks
+##### Étapes Clés du Job deploy-to-eks
 
 1. **Checkout**: Récupère le code source depuis le dépôt GitHub.
 
@@ -134,7 +134,7 @@ Nous avons configuré le workflow pour qu'il s'active lors d'un `push` sur la br
 **Secrets CD requis**:
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `EKS_CLUSTER_NAME`
 
-## 5.2 Manifests Kubernetes
+#### Manifests Kubernetes
 - **API**: [k8s/quiz-api.yml](https://github.com/DevOpsQuizz/DevOps/blob/main/k8s/quiz-api.yml)
   - **Deployment**: 1 réplique, image `nassimm/quiz-api:latest`, port 5000.
   - **Requests/Limits**: 256Mi/250m (requests), 512Mi/500m (limits).
