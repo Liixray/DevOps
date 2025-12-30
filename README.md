@@ -115,10 +115,34 @@ docker rm -f quiz-api-local; docker rm -f quiz-ui-local; docker rm -f quiz-ui-pr
 - En CI, les tests utilisent `BASE_URL=http://127.0.0.1:5000` et un secret `ADMIN_PASSWORD`.
 
 ## Déploiement
+### 5.1 Workflow CD
+Voir [.github/workflows/cd-deployement.yml](https://github.com/DevOpsQuizz/DevOps/blob/main/.github/workflows/cd-deployement.yml).
 
-```powershell
-    # TODO
-```
+#### Déclenchement (Triggers)
+Nous avons configuré le workflow pour qu'il s'active lors d'un `push` sur la branche `main`, ou spécifiquement si des fichiers dans le répertoire `k8s/` sont modifiés. Cela nous permet d'isoler nos tests Kubernetes du reste du développement.
+
+#### Étapes Clés du Job deploy-to-eks
+
+1. **Checkout**: Récupère le code source depuis le dépôt GitHub.
+
+2. **Authentification AWS**: Nous utilisons l'action `aws-actions/configure-aws-credentials@v4`. Elle récupère nos clés secrètes (Access Key et Secret Key) stockées dans les paramètres du dépôt GitHub pour nous connecter de manière sécurisée à notre compte AWS.
+
+3. **Mise à jour du Kubeconfig**: C'est une étape cruciale. Par défaut, GitHub Actions ne sait pas où se trouve notre cluster. Nous utilisons la commande `aws eks update-kubeconfig` qui télécharge les certificats et l'adresse du cluster EKS pour configurer l'outil `kubectl`.
+
+4. **Application des Manifestes**: Enfin, nous exécutons `kubectl apply`. Cette commande est dite "déclarative" : nous envoyons nos fichiers YAML (`k8s/quiz-api.yml` et `k8s/quiz-ui.yml`) au cluster, et Kubernetes se charge d'ajuster l'état réel des serveurs pour qu'il corresponde à notre description.
+
+**Secrets CD requis**:
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `EKS_CLUSTER_NAME`
+
+## 5.2 Manifests Kubernetes
+- **API**: [k8s/quiz-api.yml](https://github.com/DevOpsQuizz/DevOps/blob/main/k8s/quiz-api.yml)
+  - **Deployment**: 1 réplique, image `nassimm/quiz-api:latest`, port 5000.
+  - **Requests/Limits**: 256Mi/250m (requests), 512Mi/500m (limits).
+  - **Service**: `ClusterIP` exposant le port 5000.
+- **UI**: [k8s/quiz-ui.yml](https://github.com/DevOpsQuizz/DevOps/blob/main/k8s/quiz-ui.yml)
+  - **ConfigMap**: `frontend-config` avec `REACT_APP_API_URL: http://localhost:5000`.
+  - **Deployment**: 2 répliques, image `nassimm/quiz-ui:latest`, port 80, probes liveness/readiness `/`.
+  - **Service**: `NodePort` (ex: `32000`) pour les tests, au lieu de `LoadBalancer`. Le workflow `cd-deployement.yml` reste inchangé (application via `kubectl apply`).
 
 ## Structure des Dossiers
 
