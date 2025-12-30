@@ -13,6 +13,7 @@ DevOps/
  │     └── workflows/
  │           ├── api-tests.yml        # CI : tests Postman exécutés via Newman
  │           └── ui-test.yml          # CI : build / tests UI
+ │           └─ cd-deployement.yml    # CD : déploiement vers EKS
  │
  ├── quiz-app/
  │     ├── quiz-api/                  # Backend Flask (Python)
